@@ -3,6 +3,6 @@
 
 library(Seurat)
 
-NSCLC_DTC.data = Read10X(data.dir = "../input_data/10X_CellRanger/")
+NSCLC_DTC.data = Read10X(data.dir = "../input_data/10X_CellRanger/sample_feature_bc_matrix/")
 
 print("poutoup")
