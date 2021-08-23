@@ -1,6 +1,6 @@
 ##Before we can analyse the data, some pre processing is necessary
 ##the read of bad quality have been removed, but for examples, some cells have too low "features" (i.e. genes)
-
+#https://satijalab.org/seurat/articles/pbmc3k_tutorial.html
 library(Seurat)
 
 pbmc.data = Read10X(data.dir = "../input_data/10X_CellRanger/filtered_feature_bc_matrix/")
@@ -40,3 +40,33 @@ pbmc <- subset(pbmc, subset  = nFeature_RNA > 200 &  nFeature_RNA < 6000 & perce
 png("features_plot_after_filter.png")
 VlnPlot(pbmc, c("nFeature_RNA", "nCount_RNA", "percent.mt"))
 dev.off()
+
+
+
+##Data normalisation
+##TODO Speak of various normalisation methods and their various assumptions and practical uses.
+##Their little talk is already pretty good, but a page on "why do we normalise data" could be useful
+
+pbmc <- NormalizeData(pbmc)
+
+
+
+##Highly variable features
+pbmc <- FindVariableFeatures(pbmc, selection.method = "vst", nfeatures = 2000)
+
+# Identify the 10 most highly variable genes
+top10 <- head(VariableFeatures(pbmc), 10)
+
+# plot variable features with and without labels
+plot1 <- VariableFeaturePlot(pbmc)
+plot2 <- LabelPoints(plot = plot1, points = top10, repel = TRUE)
+png("highly_variable_features.png", width = 30, height = 20, units = "cm", res = 100)
+plot1 + plot2
+dev.off()
+
+
+##Scale the data
+all.genes <- rownames(pbmc)
+pbmc <- ScaleData(pbmc, features = all.genes)
+
+##TODO : add options to regress variations from unwanted sources (mt.DNA, Batch, GC ?)
