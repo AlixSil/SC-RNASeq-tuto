@@ -1,0 +1,7 @@
+PC1 explains a LOT of the variance, currently and seems to only concern a small number of cells
+Les features source de PC1 ne semblent pas être les features les plus variables dans l'absolu
+QUESTION : Est-ce que les cells avec PC1 positives son celles qui ont beaucoup de features ?
+ANSWER : YES ! So let's try again with harsher feature filters this time
+Seems a bit better, but its hard to know, I should probably ask the question to someone who already did a bit of SCRNASeq before
+
+QUESTION : Est-ce que je fais tout un truc sur la détection des doublets ?
