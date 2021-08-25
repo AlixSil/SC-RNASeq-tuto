@@ -41,10 +41,10 @@ dev.off()
 #The bimodal stuff does not look like it is from two cells in the same bubble (cause they would share features, so total number of features should not be twice as high)
 #But it does very strange stuff with the PCs, so we'll cut it out
 
-#pbmc <- subset(pbmc, subset  = nFeature_RNA > 200 &  nFeature_RNA < 6000 & percent.mt <16)
-#png("../img/features_plot_after_filter.png")
-#VlnPlot(pbmc, c("nFeature_RNA", "nCount_RNA", "percent.mt"))
-#dev.off()
+pbmc <- subset(pbmc, subset  = nFeature_RNA > 200 &  nFeature_RNA < 2500 & percent.mt <5)
+png("../img/features_plot_after_filter.png")
+VlnPlot(pbmc, c("nFeature_RNA", "nCount_RNA", "percent.mt"))
+dev.off()
 
 
 
@@ -52,82 +52,80 @@ dev.off()
 ##TODO Speak of various normalisation methods and their various assumptions and practical uses.
 ##Their little talk is already pretty good, but a page on "why do we normalise data" could be useful
 
-#pbmc <- NormalizeData(pbmc)
+pbmc <- NormalizeData(pbmc)
 
 
 
 ##Highly variable features
-#pbmc <- FindVariableFeatures(pbmc, selection.method = "vst", nfeatures = 2000)
+pbmc <- FindVariableFeatures(pbmc, selection.method = "vst", nfeatures = 2000)
 
 # Identify the 10 most highly variable genes
-#top10 <- head(VariableFeatures(pbmc), 10)
+top10 <- head(VariableFeatures(pbmc), 10)
 
 # plot variable features with and without labels
-#plot1 <- VariableFeaturePlot(pbmc)
-#plot2 <- LabelPoints(plot = plot1, points = top10, repel = TRUE)
-#png("../img/highly_variable_features.png", width = 30, height = 20, units = "cm", res = 100)
-#plot1 + plot2
-#dev.off()
+plot1 <- VariableFeaturePlot(pbmc)
+plot2 <- LabelPoints(plot = plot1, points = top10, repel = TRUE)
+png("../img/highly_variable_features.png", width = 30, height = 20, units = "cm", res = 100)
+plot1 + plot2
+dev.off()
 
 
 ##Scale the data
-#all.genes <- rownames(pbmc)
-#pbmc <- ScaleData(pbmc, features = all.genes)
+all.genes <- rownames(pbmc)
+pbmc <- ScaleData(pbmc, features = all.genes)
 #TODO write a paragraph about what is scaling the data
 #TODO Write a paragraph for the interests and problems with scaling the data
 ##TODO : add options to regress variations from unwanted sources (mt.DNA, Batch, GC ?)
 
 
 ##PCA
-#pbmc <- RunPCA(pbmc, features = VariableFeatures(object = pbmc))
+pbmc <- RunPCA(pbmc, features = VariableFeatures(object = pbmc))
 #TODO : Explanation of a PCA
 #PCA only run on variable features that have been scaled, so here, only the first 2000 !
 #Why only variables features
 #Ways to look at the PCA results
 #TODO : exxplain that Seurat uses PCA results for a bunch of other things, so it has to be computed
-#print(pbmc[["pca"]], dims = 1:5, nfeatures = 4)
+print(pbmc[["pca"]], dims = 1:5, nfeatures = 4)
 
-#png("../img/genes_participations_to_PCs.png", width = 30, height = 20, units = "cm", res = 100)
-#VizDimLoadings(pbmc, dims = 1:2, reduction = "pca")
-#dev.off()
+png("../img/genes_participations_to_PCs.png", width = 30, height = 20, units = "cm", res = 100)
+VizDimLoadings(pbmc, dims = 1:2, reduction = "pca")
+dev.off()
 
-#png("../img/pca.png", width = 20, height = 20, units = "cm", res = 100)
-#DimPlot(pbmc, reduction = "pca")
-#dev.off()
+png("../img/pca.png", width = 20, height = 20, units = "cm", res = 100)
+DimPlot(pbmc, reduction = "pca")
+dev.off()
 
-#png("../img/PCA_by_cells.png", width = 30, height = 20, units="cm", res=100)
-#DimHeatmap(pbmc, dims = 1, cells = 100, balanced = TRUE)
-#dev.off()
+png("../img/PCA_by_cells.png", width = 30, height = 20, units="cm", res=100)
+DimHeatmap(pbmc, dims = 1, cells = 100, balanced = TRUE)
+dev.off()
 
-
-#print("test perso, to delete once I'm done")
-#print(str(pbmc[["pca"]]))
-
-#PCs_infos = as.data.table(pbmc[["pca"]]@cell.embeddings)[, .(PC_1, PC_2)]
-#PCs_infos[, cell_ID := rownames(pbmc[["pca"]]@cell.embeddings)]
-#PCs_infos[, nfeatures := pbmc@meta.data$nFeature_RNA]
-
-#print("correlation test")
-#print(PCs_infos[, cor.test(PC_1, nfeatures)])
-
-#p <- ggplot(PCs_infos, aes(x = PC_1, y = PC_2, color = nfeatures))
-#p <- p + geom_point()
-
-
-#print(p)
-#print("fin du test perso")
 
 ##Determine the dimensionality of the dataset (i.e. clusterisation)
 ##TODO Why it's needed
 ##Descirption of the method
-#pbmc <- JackStraw(pbmc, num.replicate = 100)
-#pbmc <- ScoreJackStraw(pbmc, dims = 1:20)
+pbmc <- JackStraw(pbmc, num.replicate = 100)
+pbmc <- ScoreJackStraw(pbmc, dims = 1:20)
 
-#png("../img/JackStrawPlot.png", width = 20, height = 20, units = "cm", res = 100)
-#JackStrawPlot(pbmc, dims = 1:20)
-#dev.off()
+png("../img/JackStrawPlot.png", width = 20, height = 20, units = "cm", res = 100)
+JackStrawPlot(pbmc, dims = 1:20)
+dev.off()
 
 
-#png("../img/Elbowplot.png", width = 20, height = 20, units = "cm", res = 100)
-#ElbowPlot(pbmc)
-#dev.off()
+png("../img/Elbowplot.png", width = 20, height = 20, units = "cm", res = 100)
+ElbowPlot(pbmc)
+dev.off()
+
+
+##Clustering
+#distance is computed based on PCs
+#TODO : curse of dimensionality with the dimensionality reduction thing ?
+pbmc <- FindNeighbors(pbmc, dims = 1:10)
+pbmc <- FindClusters(pbmc, resolution = 0.5)
+
+
+##UMAP
+
+pbmc <- RunUMAP(pbmc, dims = 1:10) #Dims here are still PCA decided
+png("../img/UMAP.png", width = 20, height = 20, units = "cm", res = 100)
+DimPlot(pbmc, reduction = "umap")
+dev.off()
